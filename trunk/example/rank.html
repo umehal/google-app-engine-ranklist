@@ -1,0 +1,15 @@
+<html>
+<head><title>Ranklist Example</title></head>
+<body>
+<h1>Ranklist Example</h1>
+
+<p>At rank {{ rank }}, the score is {{ score }}.</p>
+
+{% if tied %}
+<p>Rank {{ rank }} is actually tied with {{ rank_at_tie}}.</p>
+{% endif %}
+
+<p><a href="/">Home</p>
+
+</body>
+</html>
