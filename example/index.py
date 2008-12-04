@@ -60,7 +60,7 @@ class SetScoreHandler(webapp.RequestHandler):
       self.response.out.write(template.render(path, template_values))
       return
     r = GetRanker()
-    r.SetScore(name, score)
+    r.SetScore(name, [score])
     self.redirect("/")
 
 
