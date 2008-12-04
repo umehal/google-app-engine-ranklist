@@ -44,8 +44,23 @@ class MainPage(webapp.RequestHandler):
 
 class SetScoreHandler(webapp.RequestHandler):
   def post(self):
+    score = self.request.get("score")
+    name = self.request.get("name")
+    try:
+      assert len(name) > 0
+      assert name[0] < '0' or name[0] > '9'
+      score = int(score)
+      assert 0 <= score <= 10000
+    except:
+      template_values = {"error":
+                         "Your name must not be empty, and must not start "
+                         "with a digit.  In addition, your score must be "
+                         "an integer between 0 and 10000, inclusive."}
+      path = os.path.join(os.path.dirname(__file__), 'error.html')
+      self.response.out.write(template.render(path, template_values))
+      return
     r = GetRanker()
-    r.SetScore(self.request.get("name"), [int(self.request.get("score"))])
+    r.SetScore(name, score)
     self.redirect("/")
 
 
@@ -53,15 +68,20 @@ class QueryRankPage(webapp.RequestHandler):
   def get(self):
     r = GetRanker()
     rank = int(self.request.get("rank"))
-    (score, rank_at_tie) = r.FindScore(rank)
+    if rank >= r.TotalRankedScores():
+      template_values = {"error":
+                         "There aren't %d ranked people!" % (rank + 1)}
+      path = os.path.join(os.path.dirname(__file__), 'error.html')
+      self.response.out.write(template.render(path, template_values))
+    else:
+      (score, rank_at_tie) = r.FindScore(rank)
+      template_values = {"score": score, "rank": rank}
+      if rank_at_tie < rank:
+        template_values["tied"] = True
+        template_values["rank_at_tie"] = rank_at_tie
 
-    template_values = {"score": score, "rank": rank}
-    if rank_at_tie < rank:
-      template_values["tied"] = True
-      template_values["rank_at_tie"] = rank_at_tie
-
-    path = os.path.join(os.path.dirname(__file__), 'rank.html')
-    self.response.out.write(template.render(path, template_values))
+      path = os.path.join(os.path.dirname(__file__), 'rank.html')
+      self.response.out.write(template.render(path, template_values))
 
 
 application = webapp.WSGIApplication(
