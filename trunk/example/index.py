@@ -50,12 +50,12 @@ class SetScoreHandler(webapp.RequestHandler):
       assert len(name) > 0
       assert name[0] < '0' or name[0] > '9'
       score = int(score)
-      assert 0 <= score <= 10000
+      assert 0 <= score <= 9999
     except:
       template_values = {"error":
                          "Your name must not be empty, and must not start "
                          "with a digit.  In addition, your score must be "
-                         "an integer between 0 and 10000, inclusive."}
+                         "an integer between 0 and 9999, inclusive."}
       path = os.path.join(os.path.dirname(__file__), 'error.html')
       self.response.out.write(template.render(path, template_values))
       return
