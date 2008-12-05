@@ -35,6 +35,10 @@ def GetRanker():
     datastore.Put(app)
     return r
 
+def ReturnError(self, error):
+  template_values = {"error": error}
+  path = os.path.join(os.path.dirname(__file__), 'error.html')
+  self.response.out.write(template.render(path, template_values))
 
 class MainPage(webapp.RequestHandler):
   def get(self):
@@ -52,12 +56,9 @@ class SetScoreHandler(webapp.RequestHandler):
       score = int(score)
       assert 0 <= score <= 9999
     except:
-      template_values = {"error":
-                         "Your name must not be empty, and must not start "
-                         "with a digit.  In addition, your score must be "
-                         "an integer between 0 and 9999, inclusive."}
-      path = os.path.join(os.path.dirname(__file__), 'error.html')
-      self.response.out.write(template.render(path, template_values))
+      ReturnError(self, "Your name must not be empty, and must not start with "
+                  "a digit.  In addition, your score must be an integer "
+                  "between 0 and 9999, inclusive.")
       return
     r = GetRanker()
     r.SetScore(name, [score])
@@ -69,13 +70,10 @@ class QueryRankPage(webapp.RequestHandler):
     r = GetRanker()
     rank = int(self.request.get("rank"))
     if rank >= r.TotalRankedScores():
-      template_values = {"error":
-                         "There aren't %d ranked people!" % (rank + 1)}
-      path = os.path.join(os.path.dirname(__file__), 'error.html')
-      self.response.out.write(template.render(path, template_values))
+      ReturnError(self, "There aren't %d ranked people!" % (rank + 1))
     else:
       (score, rank_at_tie) = r.FindScore(rank)
-      template_values = {"score": score, "rank": rank}
+      template_values = {"score": score[0], "rank": rank}
       if rank_at_tie < rank:
         template_values["tied"] = True
         template_values["rank_at_tie"] = rank_at_tie
@@ -84,10 +82,28 @@ class QueryRankPage(webapp.RequestHandler):
       self.response.out.write(template.render(path, template_values))
 
 
+class QueryScorePage(webapp.RequestHandler):
+  def get(self):
+    r = GetRanker()
+    try:
+      score = int(self.request.get("score"))
+      assert 0 <= score <= 9999
+    except:
+      ReturnError(self, "Scores must be integers between 0 and 9999 "
+                  "inclusive.")
+      return
+    rank = r.FindRank([score])
+    template_values = {"score": score, "rank": rank}
+
+    path = os.path.join(os.path.dirname(__file__), 'score.html')
+    self.response.out.write(template.render(path, template_values))
+
+
 application = webapp.WSGIApplication(
                                      [('/', MainPage),
                                       ('/setscore', SetScoreHandler),
-                                      ('/getrank', QueryRankPage)
+                                      ('/getrank', QueryRankPage),
+                                      ('/getscore', QueryScorePage)
                                       ],
                                      debug=True)
 
