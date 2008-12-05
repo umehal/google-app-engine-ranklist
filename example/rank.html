@@ -3,10 +3,10 @@
 <body>
 <h1>Ranklist Example</h1>
 
-<p>At rank {{ rank }}, the score is {{ score }}.</p>
+<p>The person at rank {{ rank }} has a score of {{ score }}.</p>
 
 {% if tied %}
-<p>Rank {{ rank }} is actually tied with {{ rank_at_tie}}.</p>
+<p>The person at rank {{ rank }} is actually in a tie for rank {{ rank_at_tie}}.</p>
 {% endif %}
 
 <p><a href="/">Home</p>
