@@ -52,7 +52,7 @@ class SetScoreHandler(webapp.RequestHandler):
     name = self.request.get("name")
     try:
       assert len(name) > 0
-      assert name[0] < '0' or name[0] > '9'
+      assert name[0] in "0123456789"
       score = int(score)
       assert 0 <= score <= 9999
     except:
